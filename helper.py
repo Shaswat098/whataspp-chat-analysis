@@ -95,3 +95,36 @@ def daily_timeline(selected_user, df):
 
     daily_timeline = df.groupby('only_date').count()['message'].reset_index()
     return daily_timeline
+
+def week_activity_map(selected_user, df):
+    if(selected_user != 'Overall'):
+        df = df[df['user'] == selected_user]
+
+    return df['day_name'].value_counts()
+
+def month_activity_map(selected_user, df):
+    if(selected_user != 'Overall'):
+        df = df[df['user'] == selected_user]
+
+    return df['month'].value_counts()
+
+def activity_heatmap(selected_user, df):
+    if(selected_user != 'Overall'):
+        df = df[df['user'] == selected_user]
+
+    period = []
+    for hour in df[['day_name', 'hour']]['hour']:
+        if hour == 23:
+            period.append(str(hour) + "-" + str('00'))
+        elif hour == 0:
+            period.append(str('00') + "-" + str(hour + 1))
+        else:
+            period.append(str(hour) + "-" + str(hour + 1))
+
+    df['period'] = period
+
+    user_heatmap = df.pivot_table(index='day_name',
+                                   columns='hour',
+                                   values='message',
+                                   aggfunc='count').fillna(0)
+    return user_heatmap
